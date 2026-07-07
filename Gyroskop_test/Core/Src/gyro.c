@@ -12,6 +12,8 @@
 
 #define GYRO_REG_WHO_AM_I 	   0x0FU
 
+#define GYRO_SPI_AUTO_INC      0x40U
+
 #define GYRO_REG_CTRL1         0x20U
 #define GYRO_REG_CTRL2         0x21U
 #define GYRO_REG_CTRL3         0x22U
@@ -58,6 +60,16 @@ extern SPI_HandleTypeDef hspi5;
 //	return st;
 //}
 
+void Start_Gyro_SPI(void)
+{
+	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
+}
+
+void Stop_Gyro_SPI(void)
+{
+	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
+}
+
 GyroStatus_t Gyro_ReadReg(uint8_t reg, uint8_t *value)
 {
 	if (value == NULL)
@@ -68,9 +80,9 @@ GyroStatus_t Gyro_ReadReg(uint8_t reg, uint8_t *value)
 	uint8_t tx[2] = {(uint8_t)(reg | GYRO_SPI_READ),0x00U};
 	uint8_t rx[2] = {0};
 
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
+	Start_Gyro_SPI();
 	HAL_StatusTypeDef hal_status  = HAL_SPI_TransmitReceive(&hspi5, tx, rx, 2, 100);
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
+	Stop_Gyro_SPI();
 
 	if (hal_status == HAL_TIMEOUT)
 	{
@@ -86,14 +98,51 @@ GyroStatus_t Gyro_ReadReg(uint8_t reg, uint8_t *value)
 	return GYRO_OK;
 }
 
+GyroStatus_t Gyro_ReadMultiReg(uint8_t start_reg, uint8_t *buf, uint16_t len)
+{
+    if ((buf == NULL) || (len == 0U))
+    {
+        return GYRO_ERROR;
+    }
+
+    uint8_t tx[7] = {0};   // 1 command byte + 6 dummy bytes
+    uint8_t rx[7] = {0};
+
+    // Команда: READ + auto-increment + starting register
+    // Для I3G4250D это чтение с OUT_X_L.
+    tx[0] = (uint8_t)(start_reg | GYRO_SPI_READ | GYRO_SPI_AUTO_INC);
+
+    Start_Gyro_SPI();
+    HAL_StatusTypeDef hal_status = HAL_SPI_TransmitReceive(&hspi5, tx, rx, (uint16_t)sizeof(tx), 100);
+    Stop_Gyro_SPI();
+
+    if (hal_status == HAL_TIMEOUT)
+    {
+        return GYRO_TIMEOUT;
+    }
+    if (hal_status != HAL_OK)
+    {
+        return GYRO_ERROR;
+    }
+
+    // rx[0] — мусор/служебный байт во время передачи команды
+    // rx[1..6] — данные регистра подряд
+    for (uint16_t i = 0U; i < len; i++)
+    {
+        buf[i] = rx[i + 1U];
+    }
+
+    return GYRO_OK;
+}
+
 
 GyroStatus_t Gyro_WriteReg(uint8_t reg, uint8_t value)
 {
 	uint8_t tx[2] = {(uint8_t)(reg & GYRO_SPI_WRITE), value};
 
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
+	Start_Gyro_SPI();
 	HAL_StatusTypeDef hal_status = HAL_SPI_Transmit(&hspi5, tx, 2, 100);
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
+	Stop_Gyro_SPI();
 
 	if (hal_status == HAL_TIMEOUT)
 	{
@@ -175,59 +224,23 @@ GyroStatus_t Gyro_Init(void)
 
 GyroStatus_t Gyro_ReadRaw(GyroRawData_t *data)
 {
-	if (data == NULL)
-	{
-		return GYRO_ERROR;
-	}
+    if (data == NULL)
+    {
+        return GYRO_ERROR;
+    }
 
-	//Read raw X axis
-	uint8_t raw_X_H = 0;
-	uint8_t raw_X_L = 0;
-	GyroStatus_t status = Gyro_ReadReg(GYRO_REG_OUT_X_L, &raw_X_L);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
-	status = Gyro_ReadReg(GYRO_REG_OUT_X_H, &raw_X_H);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
+    uint8_t buf[6] = {0};
+    GyroStatus_t status = Gyro_ReadMultiReg(GYRO_REG_OUT_X_L, buf, 6);
+    if (status != GYRO_OK)
+    {
+        return status;
+    }
 
+    data->x = (int16_t)((uint16_t)buf[1] << 8 | buf[0]);
+    data->y = (int16_t)((uint16_t)buf[3] << 8 | buf[2]);
+    data->z = (int16_t)((uint16_t)buf[5] << 8 | buf[4]);
 
-	//Read raw Y axis
-	uint8_t raw_Y_H = 0;
-	uint8_t raw_Y_L = 0;
-	status = Gyro_ReadReg(GYRO_REG_OUT_Y_L, &raw_Y_L);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
-	status = Gyro_ReadReg(GYRO_REG_OUT_Y_H, &raw_Y_H);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
-
-	//Read raw Z axis
-	uint8_t raw_Z_H = 0;
-	uint8_t raw_Z_L = 0;
-	status = Gyro_ReadReg(GYRO_REG_OUT_Z_L, &raw_Z_L);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
-	status = Gyro_ReadReg(GYRO_REG_OUT_Z_H, &raw_Z_H);
-	if (status != GYRO_OK)
-	{
-		return status;
-	}
-
-	data->x = (int16_t)((raw_X_H << 8) | raw_X_L);
-	data->y = (int16_t)((raw_Y_H << 8) | raw_Y_L);
-	data->z = (int16_t)((raw_Z_H << 8) | raw_Z_L);
-
-	return GYRO_OK;
+    return GYRO_OK;
 }
 
 

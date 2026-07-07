@@ -37,9 +37,13 @@ typedef struct
 	GyroStatus_t Gyro_Init(void);
 	GyroStatus_t Gyro_ReadWhoAmI(uint8_t *id);
 	GyroStatus_t Gyro_ReadReg(uint8_t reg, uint8_t *value);
+	GyroStatus_t Gyro_ReadMultiReg(uint8_t start_reg, uint8_t *buf, uint16_t len);
 	GyroStatus_t Gyro_WriteReg(uint8_t reg, uint8_t value);
 
 	GyroStatus_t Gyro_ReadRaw(GyroRawData_t *data);
+
+	void Start_Gyro_SPI(void);
+	void Stop_Gyro_SPI(void);
 
 	//HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value);
 
