@@ -21,6 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "gyro.h"
 
 /* USER CODE END Includes */
 
@@ -45,8 +46,9 @@ SPI_HandleTypeDef hspi5;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-#define GYRO_CS_GPIO_Port GPIOC
-#define GYRO_CS_Pin 	  GPIO_PIN_1
+#define RED_LED_Pin		  GPIO_PIN_14
+#define RED_LED_GPIO_Port GPIOG
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -55,7 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_SPI5_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
-static HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -95,22 +97,14 @@ int main(void)
   MX_SPI5_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t whoami = 0;
-
-  if (Gyro_ReadReg(0x0F, &whoami) == HAL_OK)
+  if (Gyro_Init() == GYRO_OK)
   {
-	  if (whoami == 0xD3)
-	  {
-		  HAL_UART_Transmit(&huart1, (uint8_t *)"GYRO is OK\r\n", 12, 100);
-	  }
-	  else
-	  {
-		  HAL_UART_Transmit(&huart1, (uint8_t *)"WHO_AM_I mismatch\r\n", 19, 100);
-	  }
+	  HAL_UART_Transmit(&huart1, (uint8_t *)"GYRO is OK\r\n", sizeof("GYRO is OK\r\n") - 1, 100);
+	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
   }
   else
   {
-	  HAL_UART_Transmit(&huart1, (uint8_t *)"SPI read failed\r\n", 17, 100);
+  	  HAL_UART_Transmit(&huart1, (uint8_t *)"WHO_AM_I failed\r\n", sizeof("WHO_AM_I failed\r\n") - 1, 100);
   }
 
 
@@ -255,9 +249,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : PC1 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
@@ -266,6 +264,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PG14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
@@ -273,21 +278,7 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-static HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value)
-{
-	uint8_t tx[2] = {(uint8_t)(reg | 0x80), 0x00};
-	uint8_t rx[2] = {0};
 
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
-	HAL_StatusTypeDef st = HAL_SPI_TransmitReceive(&hspi5, tx, rx, 2, 100);
-	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
-
-	if (st == HAL_OK)
-	{
-		*value = rx[1];
-	}
-	return st;
-}
 
 /* USER CODE END 4 */
 
