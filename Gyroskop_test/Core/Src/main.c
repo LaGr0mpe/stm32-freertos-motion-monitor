@@ -21,7 +21,11 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "string.h"
+#include "stdio.h"
+
 #include "gyro.h"
+
 
 /* USER CODE END Includes */
 
@@ -44,6 +48,8 @@
 SPI_HandleTypeDef hspi5;
 
 UART_HandleTypeDef huart1;
+
+GyroRawData_t raw_gyro_data;
 
 /* USER CODE BEGIN PV */
 #define RED_LED_Pin		  GPIO_PIN_14
@@ -108,12 +114,37 @@ int main(void)
   }
 
 
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  char txBuf[64];
+
   while (1)
   {
+	    if (Gyro_ReadRaw(&raw_gyro_data) != GYRO_OK)
+	    {
+	        strcpy(txBuf, "Reading raw data failed\r\n");
+	    }
+	    else
+	    {
+	        snprintf(txBuf,
+	                 sizeof(txBuf),
+	                 "X:%6d  Y:%6d  Z:%6d\r\n",
+	                 raw_gyro_data.x,
+	                 raw_gyro_data.y,
+	                 raw_gyro_data.z);
+	    }
+
+	    HAL_UART_Transmit(&huart1,
+	                      (uint8_t *)txBuf,
+	                      strlen(txBuf),
+	                      100);
+
+	    HAL_Delay(100);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

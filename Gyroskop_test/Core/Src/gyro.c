@@ -19,8 +19,15 @@
 #define GYRO_REG_CTRL5         0x24U
 
 #define GYRO_REG_STATUS        0x27U
+
 #define GYRO_REG_OUT_X_L       0x28U
 #define GYRO_REG_OUT_X_H       0x29U
+
+#define GYRO_REG_OUT_Y_L       0x2AU
+#define GYRO_REG_OUT_Y_H       0x2BU
+
+#define GYRO_REG_OUT_Z_L       0x2CU
+#define GYRO_REG_OUT_Z_H       0x2DU
 
 #define GYRO_SET_CTRL_REG1     0x0FU
 
@@ -164,7 +171,66 @@ GyroStatus_t Gyro_Init(void)
 	}
 
 	return GYRO_OK;
-
 }
+
+GyroStatus_t Gyro_ReadRaw(GyroRawData_t *data)
+{
+	if (data == NULL)
+	{
+		return GYRO_ERROR;
+	}
+
+	//Read raw X axis
+	uint8_t raw_X_H = 0;
+	uint8_t raw_X_L = 0;
+	GyroStatus_t status = Gyro_ReadReg(GYRO_REG_OUT_X_L, &raw_X_L);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+	status = Gyro_ReadReg(GYRO_REG_OUT_X_H, &raw_X_H);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+
+
+	//Read raw Y axis
+	uint8_t raw_Y_H = 0;
+	uint8_t raw_Y_L = 0;
+	status = Gyro_ReadReg(GYRO_REG_OUT_Y_L, &raw_Y_L);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+	status = Gyro_ReadReg(GYRO_REG_OUT_Y_H, &raw_Y_H);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+
+	//Read raw Z axis
+	uint8_t raw_Z_H = 0;
+	uint8_t raw_Z_L = 0;
+	status = Gyro_ReadReg(GYRO_REG_OUT_Z_L, &raw_Z_L);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+	status = Gyro_ReadReg(GYRO_REG_OUT_Z_H, &raw_Z_H);
+	if (status != GYRO_OK)
+	{
+		return status;
+	}
+
+	data->x = (int16_t)((raw_X_H << 8) | raw_X_L);
+	data->y = (int16_t)((raw_Y_H << 8) | raw_Y_L);
+	data->z = (int16_t)((raw_Z_H << 8) | raw_Z_L);
+
+	return GYRO_OK;
+}
+
+
+
 
 

@@ -1,4 +1,5 @@
-../Core/Src/gyro.c:54:14:Gyro_ReadReg	32	static
-../Core/Src/gyro.c:83:14:Gyro_WriteReg	24	static
-../Core/Src/gyro.c:105:14:Gyro_ReadWhoAmI	16	static
-../Core/Src/gyro.c:110:14:Gyro_Init	24	static
+../Core/Src/gyro.c:61:14:Gyro_ReadReg	32	static
+../Core/Src/gyro.c:90:14:Gyro_WriteReg	24	static
+../Core/Src/gyro.c:112:14:Gyro_ReadWhoAmI	16	static
+../Core/Src/gyro.c:117:14:Gyro_Init	24	static
+../Core/Src/gyro.c:176:14:Gyro_ReadRaw	24	static
