@@ -10,17 +10,23 @@
 #define GYRO_CS_GPIO_Port GPIOC
 #define GYRO_CS_Pin 	  GPIO_PIN_1
 
-#define GYRO_REG_WHO_AM_I 	   0x0F
+#define GYRO_REG_WHO_AM_I 	   0x0FU
 
-#define GYRO_REG_CTRL1         0x20
-#define GYRO_REG_CTRL2         0x21
-#define GYRO_REG_CTRL3         0x22
-#define GYRO_REG_CTRL4         0x23
-#define GYRO_REG_CTRL5         0x24
+#define GYRO_REG_CTRL1         0x20U
+#define GYRO_REG_CTRL2         0x21U
+#define GYRO_REG_CTRL3         0x22U
+#define GYRO_REG_CTRL4         0x23U
+#define GYRO_REG_CTRL5         0x24U
 
-#define GYRO_REG_STATUS        0x27
-#define GYRO_REG_OUT_X_L       0x28
-#define GYRO_REG_OUT_X_H       0x29
+#define GYRO_REG_STATUS        0x27U
+#define GYRO_REG_OUT_X_L       0x28U
+#define GYRO_REG_OUT_X_H       0x29U
+
+#define GYRO_SET_CTRL_REG1     0x0FU
+
+#define GYRO_CTRL4_FS_245DPS   (0x00U)
+#define GYRO_CTRL4_FS_500DPS   (0x10U)
+#define GYRO_CTRL4_FS_2000DPS  (0x20U)
 
 extern SPI_HandleTypeDef hspi5;
 
@@ -103,18 +109,60 @@ GyroStatus_t Gyro_ReadWhoAmI(uint8_t *id)
 
 GyroStatus_t Gyro_Init(void)
 {
+	//Check WhoAmI register
 	uint8_t whoami_id = 0;
 
-	GyroStatus_t gyro_status = Gyro_ReadWhoAmI(&whoami_id);
+	GyroStatus_t gyro_status_whoami = Gyro_ReadWhoAmI(&whoami_id);
 
-	if (gyro_status != GYRO_OK)
+	if (gyro_status_whoami != GYRO_OK)
 	{
-		return gyro_status;
+		return gyro_status_whoami;
 	}
 	if (whoami_id != GYRO_DEVICE_ID)
 	{
 		return GYRO_BAD_ID;
 	}
+
+	//Set CTRL_REG1 register
+	uint8_t ctrl1_set = GYRO_SET_CTRL_REG1;
+	GyroStatus_t gyro_status_write_ctrl1 = Gyro_WriteReg(GYRO_REG_CTRL1, ctrl1_set);
+	if (gyro_status_write_ctrl1 != GYRO_OK)
+	{
+		return gyro_status_write_ctrl1;
+	}
+
+	uint8_t ctrl1_check = 0;
+	GyroStatus_t gyro_status_read_ctrl1 = Gyro_ReadReg(GYRO_REG_CTRL1, &ctrl1_check);
+	if (gyro_status_read_ctrl1 != GYRO_OK)
+	{
+		return gyro_status_read_ctrl1;
+	}
+
+	if (ctrl1_check != ctrl1_set)
+	{
+		return GYRO_VERIFY_FAIL;
+	}
+
+	//Set CTRL_REG4 register
+	uint8_t ctrl4_set = GYRO_CTRL4_FS_245DPS;
+	GyroStatus_t gyro_status_write_ctrl4 = Gyro_WriteReg(GYRO_REG_CTRL4, ctrl4_set);
+	if (gyro_status_write_ctrl4 != GYRO_OK)
+	{
+		return gyro_status_write_ctrl4;
+	}
+
+	uint8_t ctrl4_check = 0;
+	GyroStatus_t gyro_status_read_ctrl4 = Gyro_ReadReg(GYRO_REG_CTRL4, &ctrl4_check);
+	if (gyro_status_read_ctrl4 != GYRO_OK)
+	{
+		return gyro_status_read_ctrl4;
+	}
+
+	if (ctrl4_check != ctrl4_set)
+	{
+		return GYRO_VERIFY_FAIL;
+	}
+
 	return GYRO_OK;
 
 }

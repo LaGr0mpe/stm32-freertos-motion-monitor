@@ -1,4 +1,4 @@
-../Core/Src/gyro.c:48:14:Gyro_ReadReg	4
-../Core/Src/gyro.c:77:14:Gyro_WriteReg	3
-../Core/Src/gyro.c:99:14:Gyro_ReadWhoAmI	1
-../Core/Src/gyro.c:104:14:Gyro_Init	3
+../Core/Src/gyro.c:54:14:Gyro_ReadReg	4
+../Core/Src/gyro.c:83:14:Gyro_WriteReg	3
+../Core/Src/gyro.c:105:14:Gyro_ReadWhoAmI	1
+../Core/Src/gyro.c:110:14:Gyro_Init	9

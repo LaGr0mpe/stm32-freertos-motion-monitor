@@ -21,13 +21,25 @@ typedef enum{
 	GYRO_ERROR,
 	GYRO_TIMEOUT,
 	GYRO_BAD_ID,
-	GYRO_INVALID_ARG
+	GYRO_INVALID_ARG,
+	GYRO_VERIFY_FAIL
 } GyroStatus_t;
+
+typedef struct
+{
+	int16_t x;
+	int16_t y;
+	int16_t z;
+} Gyro_RawData_t;
+
+
 
 	GyroStatus_t Gyro_Init(void);
 	GyroStatus_t Gyro_ReadWhoAmI(uint8_t *id);
 	GyroStatus_t Gyro_ReadReg(uint8_t reg, uint8_t *value);
 	GyroStatus_t Gyro_WriteReg(uint8_t reg, uint8_t value);
+
+	GyroStatus_t Gyro_ReadRaw(GyroRawData_t *data);
 
 	//HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value);
 
