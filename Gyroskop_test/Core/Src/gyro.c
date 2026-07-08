@@ -50,27 +50,6 @@ extern SPI_HandleTypeDef hspi5;
 
 static GyroBias_t gyro_bias = {0};
 
-//HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value)
-//{
-//	if (value == NULL)
-//	{
-//		return HAL_ERROR;
-//	}
-//
-//	uint8_t tx[2] = {(uint8_t)(reg | 0x80U), 0x00U};
-//	uint8_t rx[2] = {0};
-//
-//	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
-//	HAL_StatusTypeDef st = HAL_SPI_TransmitReceive(&hspi5, tx, rx, 2, 100);
-//	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_SET);
-//
-//	if (st == HAL_OK)
-//	{
-//		*value = rx[1];
-//	}
-//	return st;
-//}
-
 void Start_Gyro_SPI(void)
 {
 	HAL_GPIO_WritePin(GYRO_CS_GPIO_Port, GYRO_CS_Pin, GPIO_PIN_RESET);
