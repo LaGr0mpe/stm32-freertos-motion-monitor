@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "string.h"
 #include "stdio.h"
+#include <stdbool.h>
 
 #include "gyro.h"
 
@@ -49,11 +50,10 @@ SPI_HandleTypeDef hspi5;
 
 UART_HandleTypeDef huart1;
 
-GyroRawData_t raw_gyro_data;
-
 /* USER CODE BEGIN PV */
 #define RED_LED_Pin		  GPIO_PIN_14
 #define RED_LED_GPIO_Port GPIOG
+GyroConvertedData_t converted_gyro_data;
 
 /* USER CODE END PV */
 
@@ -103,14 +103,20 @@ int main(void)
   MX_SPI5_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  if (Gyro_Init() == GYRO_OK)
+
+  bool initialized = false;
+  while(!initialized)
   {
-	  HAL_UART_Transmit(&huart1, (uint8_t *)"GYRO is OK\r\n", sizeof("GYRO is OK\r\n") - 1, 100);
-	  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
-  }
-  else
-  {
-  	  HAL_UART_Transmit(&huart1, (uint8_t *)"WHO_AM_I failed\r\n", sizeof("WHO_AM_I failed\r\n") - 1, 100);
+	  if (Gyro_Init() == GYRO_OK)
+	  {
+		  HAL_UART_Transmit(&huart1, (uint8_t *)"GYRO is OK\r\n", sizeof("GYRO is OK\r\n") - 1, 100);
+		  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+		  initialized = true;
+	  }
+	  else
+	  {
+	  	  HAL_UART_Transmit(&huart1, (uint8_t *)"Initialization failed\r\n", sizeof("Initialization failed\r\n") - 1, 100);
+	  }
   }
 
 
@@ -124,7 +130,7 @@ int main(void)
 
   while (1)
   {
-	    if (Gyro_ReadRaw(&raw_gyro_data) != GYRO_OK)
+	    if (Gyro_ReadConverted(&converted_gyro_data) != GYRO_OK)
 	    {
 	        strcpy(txBuf, "Reading raw data failed\r\n");
 	    }
@@ -132,10 +138,10 @@ int main(void)
 	    {
 	        snprintf(txBuf,
 	                 sizeof(txBuf),
-	                 "X:%6d  Y:%6d  Z:%6d\r\n",
-	                 raw_gyro_data.x,
-	                 raw_gyro_data.y,
-	                 raw_gyro_data.z);
+	                 "X:%f  Y:%f  Z:%f\r\n",
+					 converted_gyro_data.x,
+					 converted_gyro_data.y,
+					 converted_gyro_data.z);
 	    }
 
 	    HAL_UART_Transmit(&huart1,
