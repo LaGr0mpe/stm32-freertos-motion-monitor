@@ -71,6 +71,5 @@ typedef struct
 	void Start_Gyro_SPI(void);
 	void Stop_Gyro_SPI(void);
 
-	//HAL_StatusTypeDef Gyro_ReadReg(uint8_t reg, uint8_t *value);
 
 #endif /* INC_GYRO_H_ */

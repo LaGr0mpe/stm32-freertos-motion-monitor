@@ -105,6 +105,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   bool initialized = false;
+  HAL_UART_Transmit(&huart1, (uint8_t *)"Initialization have been started\r\n", sizeof("Initialization have been started\r\n") - 1, 100);
   while(!initialized)
   {
 	  if (Gyro_Init() == GYRO_OK)
