@@ -1,0 +1,7 @@
+../Core/Src/lcd_ili9341_min.c:44:13:LCD_IO_Init	1
+../Core/Src/lcd_ili9341_min.c:53:13:LCD_WriteByte	2
+../Core/Src/lcd_ili9341_min.c:61:13:LCD_WriteCommand	1
+../Core/Src/lcd_ili9341_min.c:69:13:LCD_WriteData	1
+../Core/Src/lcd_ili9341_min.c:77:13:LCD_WriteDataN	2
+../Core/Src/lcd_ili9341_min.c:88:6:LCD_Init	1
+../Core/Src/lcd_ili9341_min.c:236:6:LCD_FillRGB565	2
