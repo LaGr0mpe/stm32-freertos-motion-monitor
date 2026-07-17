@@ -2,6 +2,8 @@
 
 extern SPI_HandleTypeDef hspi5;
 extern LTDC_HandleTypeDef hltdc;
+extern DMA2D_HandleTypeDef hdma2d;
+extern volatile bool lcd_fill_done;
 
 #define LCD_W 240U
 #define LCD_H 320U
@@ -241,3 +243,29 @@ void LCD_FillRGB565(uint16_t color)
         fb[i] = color;
     }
 }
+
+void LCD_FillRGB565_DMA(uint16_t color)
+{
+    lcd_fill_done = false;
+
+    uint32_t dma2d_color = RGB565_To_DMA2DColor(color);
+
+    if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, LCD_FB_ADDR, LCD_W, LCD_H) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
+
+uint32_t RGB565_To_DMA2DColor(uint16_t c)
+{
+    uint32_t r = (uint32_t)((c >> 11) & 0x1FU);
+    uint32_t g = (uint32_t)((c >> 5)  & 0x3FU);
+    uint32_t b = (uint32_t)(c & 0x1FU);
+
+    r = (r * 255U) / 31U;
+    g = (g * 255U) / 63U;
+    b = (b * 255U) / 31U;
+
+    return (r << 16) | (g << 8) | b;   // 0x00RRGGBB
+}
+

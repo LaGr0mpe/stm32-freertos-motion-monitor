@@ -1,7 +1,9 @@
-../Core/Src/lcd_ili9341_min.c:44:13:LCD_IO_Init	8	static
-../Core/Src/lcd_ili9341_min.c:53:13:LCD_WriteByte	16	static
-../Core/Src/lcd_ili9341_min.c:61:13:LCD_WriteCommand	16	static
-../Core/Src/lcd_ili9341_min.c:69:13:LCD_WriteData	16	static
-../Core/Src/lcd_ili9341_min.c:77:13:LCD_WriteDataN	16	static
-../Core/Src/lcd_ili9341_min.c:88:6:LCD_Init	8	static
-../Core/Src/lcd_ili9341_min.c:236:6:LCD_FillRGB565	24	static
+../Core/Src/lcd_ili9341_min.c:46:13:LCD_IO_Init	8	static
+../Core/Src/lcd_ili9341_min.c:55:13:LCD_WriteByte	16	static
+../Core/Src/lcd_ili9341_min.c:63:13:LCD_WriteCommand	16	static
+../Core/Src/lcd_ili9341_min.c:71:13:LCD_WriteData	16	static
+../Core/Src/lcd_ili9341_min.c:79:13:LCD_WriteDataN	16	static
+../Core/Src/lcd_ili9341_min.c:90:6:LCD_Init	8	static
+../Core/Src/lcd_ili9341_min.c:238:6:LCD_FillRGB565	24	static
+../Core/Src/lcd_ili9341_min.c:247:6:LCD_FillRGB565_DMA	32	static
+../Core/Src/lcd_ili9341_min.c:259:10:RGB565_To_DMA2DColor	32	static
