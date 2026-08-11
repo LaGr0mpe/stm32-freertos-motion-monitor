@@ -3,7 +3,8 @@
 extern SPI_HandleTypeDef hspi5;
 extern LTDC_HandleTypeDef hltdc;
 extern DMA2D_HandleTypeDef hdma2d;
-extern volatile bool lcd_fill_done;
+
+volatile LCD_State_t lcd_state = LCD_STATE_READY;
 
 #define LCD_W 240U
 #define LCD_H 320U
@@ -43,10 +44,13 @@ extern volatile bool lcd_fill_done;
 #define LCD_NGAMMA          0xE1
 #define LCD_INTERFACE       0xF6
 
+static uint32_t RGB565_To_DMA2DColor(uint16_t c);
+
+static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
+static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d);
+
 static void LCD_IO_Init(void)
 {
-    /* The pins are already configured by CubeMX in MX_GPIO_Init().
-       We only force a safe idle state here. */
     LCD_CS_HIGH();
     LCD_WRX_HIGH();
     LCD_RDX_HIGH();
@@ -233,6 +237,14 @@ void LCD_Init(void)
 
     __HAL_LTDC_LAYER_ENABLE(&hltdc, 0);
     __HAL_LTDC_RELOAD_CONFIG(&hltdc);
+
+    hdma2d.XferCpltCallback = LCD_DMA2D_TransferComplete;
+    hdma2d.XferErrorCallback = LCD_DMA2D_TransferError;
+}
+
+bool LCD_IsReady()
+{
+	return (lcd_state == LCD_STATE_READY);
 }
 
 void LCD_FillRGB565(uint16_t color)
@@ -244,19 +256,26 @@ void LCD_FillRGB565(uint16_t color)
     }
 }
 
-void LCD_FillRGB565_DMA(uint16_t color)
+bool LCD_FillRGB565_DMA(uint16_t color)
 {
-    lcd_fill_done = false;
+    if (lcd_state != LCD_STATE_READY)
+    {
+        return false;   // already busy
+    }
+
+    lcd_state = LCD_STATE_BUSY;
 
     uint32_t dma2d_color = RGB565_To_DMA2DColor(color);
 
     if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, LCD_FB_ADDR, LCD_W, LCD_H) != HAL_OK)
     {
+    	lcd_state = LCD_STATE_ERROR;
         Error_Handler();
     }
+    return true;
 }
 
-uint32_t RGB565_To_DMA2DColor(uint16_t c)
+static uint32_t RGB565_To_DMA2DColor(uint16_t c)
 {
     uint32_t r = (uint32_t)((c >> 11) & 0x1FU);
     uint32_t g = (uint32_t)((c >> 5)  & 0x3FU);
@@ -268,4 +287,20 @@ uint32_t RGB565_To_DMA2DColor(uint16_t c)
 
     return (r << 16) | (g << 8) | b;   // 0x00RRGGBB
 }
+
+// CALLBACKS
+static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d)
+{
+    (void)hdma2d;
+    lcd_state = LCD_STATE_READY;
+}
+
+static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d)
+{
+    (void)hdma2d;
+    lcd_state = LCD_STATE_ERROR;
+}
+
+
+
 

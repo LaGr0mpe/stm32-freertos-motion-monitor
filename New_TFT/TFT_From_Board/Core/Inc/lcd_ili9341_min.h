@@ -13,12 +13,19 @@
 #include "main.h"
 #include <stdint.h>
 #include "stdbool.h"
+////////////////////////////////////////////////////////////////////////////////
+
+typedef enum {
+    LCD_STATE_READY = 0,
+    LCD_STATE_BUSY,
+    LCD_STATE_ERROR
+} LCD_State_t;
+////////////////////////////////////////////////////////////////////////////////
 
 void LCD_Init(void);
 void LCD_FillRGB565(uint16_t color);
-void LCD_FillRGB565_DMA(uint16_t color);
-uint32_t RGB565_To_DMA2DColor(uint16_t c);
-
+bool LCD_FillRGB565_DMA(uint16_t color);
+bool LCD_IsReady();
 #endif
 
 

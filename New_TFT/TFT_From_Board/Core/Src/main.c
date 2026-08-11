@@ -57,7 +57,7 @@ UART_HandleTypeDef huart1;
 SDRAM_HandleTypeDef hsdram1;
 
 /* USER CODE BEGIN PV */
-volatile bool lcd_fill_done = false;
+
 
 
 /* USER CODE END PV */
@@ -73,8 +73,7 @@ static void MX_TIM1_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_DMA2D_Init(void);
 /* USER CODE BEGIN PFP */
-static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
-static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -210,8 +209,6 @@ int main(void)
   LCD_Reset();
   LCD_Init();
 
-  hdma2d.XferCpltCallback = LCD_DMA2D_TransferComplete;
-  hdma2d.XferErrorCallback = LCD_DMA2D_TransferError;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -221,11 +218,25 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  LCD_FillRGB565_DMA(0xF800); //red
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRGB565_DMA(0xF800)) //red
+		          Error_Handler();
+	  }
 	  HAL_Delay(1000);
-	  LCD_FillRGB565_DMA(0x07E0); //blue
+
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRGB565_DMA(0x07E0)) //blue
+				  Error_Handler();
+	  }
 	  HAL_Delay(1000);
-	  LCD_FillRGB565_DMA(0x001F); //green
+
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRGB565_DMA(0x001F)) //green
+			  Error_Handler();
+	  }
 	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
@@ -685,15 +696,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d)
-{
-    lcd_fill_done = true;
-}
 
-static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d)
-{
-    Error_Handler();
-}
 
 /* USER CODE END 4 */
 
