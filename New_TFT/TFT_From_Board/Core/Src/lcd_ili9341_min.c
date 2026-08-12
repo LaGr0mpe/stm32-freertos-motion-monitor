@@ -44,11 +44,21 @@ volatile LCD_State_t lcd_state = LCD_STATE_READY;
 #define LCD_NGAMMA          0xE1
 #define LCD_INTERFACE       0xF6
 
+//PRIVATE FUNCTIONS prototypes
+static void LCD_IO_Init(void);
+static void LCD_WriteCommand(uint8_t cmd);
+static void LCD_WriteCommand(uint8_t cmd);
+static void LCD_WriteData(uint8_t data);
+static void LCD_WriteDataN(const uint8_t *data, uint32_t len);
 static uint32_t RGB565_To_DMA2DColor(uint16_t c);
+static bool LCD_BeginTransfer(void);
+static void LCD_EndTransfer(void);
 
+//CALLBACKS prototypes
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
 static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d);
 
+//PRIVATE FUNCTIONS declarations
 static void LCD_IO_Init(void)
 {
     LCD_CS_HIGH();
@@ -90,6 +100,35 @@ static void LCD_WriteDataN(const uint8_t *data, uint32_t len)
     }
     LCD_CS_HIGH();
 }
+
+static uint32_t RGB565_To_DMA2DColor(uint16_t c)
+{
+    uint32_t r = (uint32_t)((c >> 11) & 0x1FU);
+    uint32_t g = (uint32_t)((c >> 5)  & 0x3FU);
+    uint32_t b = (uint32_t)(c & 0x1FU);
+
+    r = (r * 255U) / 31U;
+    g = (g * 255U) / 63U;
+    b = (b * 255U) / 31U;
+
+    return (r << 16) | (g << 8) | b;   // 0x00RRGGBB
+}
+
+static bool LCD_BeginTransfer(void)
+{
+    if (lcd_state != LCD_STATE_READY)
+        return false;
+
+    lcd_state = LCD_STATE_BUSY;
+    return true;
+}
+
+static void LCD_EndTransfer(void)
+{
+    lcd_state = LCD_STATE_READY;
+}
+
+//PUBLIC FUNCTIONS declarations
 
 void LCD_Init(void)
 {
@@ -247,6 +286,11 @@ bool LCD_IsReady()
 	return (lcd_state == LCD_STATE_READY);
 }
 
+LCD_State_t LCD_GetState(void)
+{
+	return lcd_state;
+}
+
 void LCD_FillRGB565(uint16_t color)
 {
     volatile uint16_t *fb = (volatile uint16_t *)LCD_FB_ADDR;
@@ -258,14 +302,12 @@ void LCD_FillRGB565(uint16_t color)
 
 bool LCD_FillRGB565_DMA(uint16_t color)
 {
-    if (lcd_state != LCD_STATE_READY)
-    {
-        return false;   // already busy
-    }
-
-    lcd_state = LCD_STATE_BUSY;
+    if (!LCD_BeginTransfer())
+    	return false;
 
     uint32_t dma2d_color = RGB565_To_DMA2DColor(color);
+
+    WRITE_REG(hdma2d.Instance->OOR, 0U);
 
     if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, LCD_FB_ADDR, LCD_W, LCD_H) != HAL_OK)
     {
@@ -275,24 +317,50 @@ bool LCD_FillRGB565_DMA(uint16_t color)
     return true;
 }
 
-static uint32_t RGB565_To_DMA2DColor(uint16_t c)
+bool LCD_FillRect_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
 {
-    uint32_t r = (uint32_t)((c >> 11) & 0x1FU);
-    uint32_t g = (uint32_t)((c >> 5)  & 0x3FU);
-    uint32_t b = (uint32_t)(c & 0x1FU);
+    if (!LCD_BeginTransfer())
+    	return false;
 
-    r = (r * 255U) / 31U;
-    g = (g * 255U) / 63U;
-    b = (b * 255U) / 31U;
+    if ((width == 0U) || (height == 0U))
+    {
+        return false;
+    }
 
-    return (r << 16) | (g << 8) | b;   // 0x00RRGGBB
+    if ((x >= LCD_W) || (y >= LCD_H))
+    {
+        return false;
+    }
+
+    if ((x + width) > LCD_W)
+    {
+        width = LCD_W - x;
+    }
+
+    if ((y + height) > LCD_H)
+    {
+        height = LCD_H - y;
+    }
+
+    uint32_t dma2d_color = RGB565_To_DMA2DColor(color);
+
+    uint32_t first_pixel_addr = LCD_FB_ADDR + (((uint32_t)y * LCD_W + x) * sizeof(uint16_t));
+
+    WRITE_REG(hdma2d.Instance->OOR, LCD_W - width);
+
+    if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, first_pixel_addr, width, height) != HAL_OK)
+        {
+    		lcd_state = LCD_STATE_ERROR;
+        	return false;
+        }
+        return true;
 }
 
-// CALLBACKS
+// CALLBACKS declarations
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d)
 {
     (void)hdma2d;
-    lcd_state = LCD_STATE_READY;
+    LCD_EndTransfer();
 }
 
 static void LCD_DMA2D_TransferError(DMA2D_HandleTypeDef *hdma2d)

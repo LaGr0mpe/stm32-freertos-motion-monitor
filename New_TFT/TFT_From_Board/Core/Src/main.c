@@ -218,26 +218,77 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRGB565_DMA(0xF800)) //red
+//		          Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRGB565_DMA(0x07E0)) //green
+//				  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRGB565_DMA(0x001F)) //blue
+//			  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, 0xFFC0)) //yellow
+//			  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRGB565_DMA(0xF800)) //red
+		  if (!LCD_FillRGB565_DMA(0x0000)) //red
 		          Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRGB565_DMA(0x07E0)) //blue
-				  Error_Handler();
+		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, 0xFFC0)) //yellow
+	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRGB565_DMA(0x001F)) //green
-			  Error_Handler();
+		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, 0xF800))
+	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
+
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, 0x07E0))
+	  	  Error_Handler();
+	  }
+	  HAL_Delay(1000);
+
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, 0x001F))
+	  	  Error_Handler();
+	  }
+	  HAL_Delay(1000);
+
+	  if (LCD_IsReady())
+	  {
+		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, 0xFFFF))
+	  	  Error_Handler();
+	  }
+	  HAL_Delay(1000);
+
+
   }
   /* USER CODE END 3 */
 }
