@@ -1,4 +1,5 @@
 #include "lcd_ili9341_min.h"
+#include "colors.h"
 
 extern SPI_HandleTypeDef hspi5;
 extern LTDC_HandleTypeDef hltdc;

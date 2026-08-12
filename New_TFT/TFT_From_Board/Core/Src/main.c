@@ -21,8 +21,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "lcd_ili9341_min.h"
 #include "stdbool.h"
+
+#include "lcd_ili9341_min.h"
+#include "colors.h"
 
 /* USER CODE END Includes */
 
@@ -248,42 +250,42 @@ int main(void)
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRGB565_DMA(0x0000)) //red
+		  if (!LCD_FillRGB565_DMA(BLACK))
 		          Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, 0xFFC0)) //yellow
+		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, YELLOW))
 	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, 0xF800))
+		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, RED))
 	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, 0x07E0))
+		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, GREEN))
 	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, 0x001F))
+		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, BLUE))
 	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, 0xFFFF))
+		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, WHITE))
 	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);

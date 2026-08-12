@@ -37,17 +37,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000f6f  00000000  00000000  00021480  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0002515b  00000000  00000000  000223ef  2**0
+ 17 .debug_macro  00025195  00000000  00000000  000223ef  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00015f25  00000000  00000000  0004754a  2**0
+ 18 .debug_line   00015f3d  00000000  00000000  00047584  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    000e15ab  00000000  00000000  0005d46f  2**0
+ 19 .debug_str    000e15f7  00000000  00000000  0005d4c1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .comment      00000043  00000000  00000000  0013ea1a  2**0
+ 20 .comment      00000043  00000000  00000000  0013eab8  2**0
                   CONTENTS, READONLY
- 21 .debug_frame  0000502c  00000000  00000000  0013ea60  2**2
+ 21 .debug_frame  0000502c  00000000  00000000  0013eafc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000057  00000000  00000000  00143a8c  2**0
+ 22 .debug_line_str 00000057  00000000  00000000  00143b28  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1617,7 +1617,7 @@ int main(void)
  8000d04:	2b00      	cmp	r3, #0
  8000d06:	d00a      	beq.n	8000d1e <main+0x56>
 	  {
-		  if (!LCD_FillRGB565_DMA(0x0000)) //red
+		  if (!LCD_FillRGB565_DMA(BLACK))
  8000d08:	2000      	movs	r0, #0
  8000d0a:	f7ff fe6d 	bl	80009e8 <LCD_FillRGB565_DMA>
  8000d0e:	4603      	mov	r3, r0
@@ -1638,7 +1638,7 @@ int main(void)
  8000d2c:	2b00      	cmp	r3, #0
  8000d2e:	d010      	beq.n	8000d52 <main+0x8a>
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, 0xFFC0)) //yellow
+		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, YELLOW))
  8000d30:	f64f 73c0 	movw	r3, #65472	@ 0xffc0
  8000d34:	9300      	str	r3, [sp, #0]
  8000d36:	23a0      	movs	r3, #160	@ 0xa0
@@ -1664,7 +1664,7 @@ int main(void)
  8000d60:	2b00      	cmp	r3, #0
  8000d62:	d010      	beq.n	8000d86 <main+0xbe>
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, 0xF800))
+		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, RED))
  8000d64:	f44f 4378 	mov.w	r3, #63488	@ 0xf800
  8000d68:	9300      	str	r3, [sp, #0]
  8000d6a:	2328      	movs	r3, #40	@ 0x28
@@ -1690,7 +1690,7 @@ int main(void)
  8000d94:	2b00      	cmp	r3, #0
  8000d96:	d010      	beq.n	8000dba <main+0xf2>
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, 0x07E0))
+		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, GREEN))
  8000d98:	f44f 63fc 	mov.w	r3, #2016	@ 0x7e0
  8000d9c:	9300      	str	r3, [sp, #0]
  8000d9e:	2328      	movs	r3, #40	@ 0x28
@@ -1716,7 +1716,7 @@ int main(void)
  8000dc8:	2b00      	cmp	r3, #0
  8000dca:	d010      	beq.n	8000dee <main+0x126>
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, 0x001F))
+		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, BLUE))
  8000dcc:	231f      	movs	r3, #31
  8000dce:	9300      	str	r3, [sp, #0]
  8000dd0:	2328      	movs	r3, #40	@ 0x28
@@ -1742,7 +1742,7 @@ int main(void)
  8000dfc:	2b00      	cmp	r3, #0
  8000dfe:	d011      	beq.n	8000e24 <main+0x15c>
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, 0xFFFF))
+		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, WHITE))
  8000e00:	f64f 73ff 	movw	r3, #65535	@ 0xffff
  8000e04:	9300      	str	r3, [sp, #0]
  8000e06:	2328      	movs	r3, #40	@ 0x28
