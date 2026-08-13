@@ -5,3 +5,6 @@
 #define BLUE_Color    0x001F
 #define WHITE_Color   0xFFFF
 #define ORANGE_Color  0xFC80
+#define PINK_Color 	  0xF81C
+#define CYAN_Color 	  0x07FE
+

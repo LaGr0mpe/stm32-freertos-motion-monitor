@@ -8,6 +8,13 @@
 #ifndef INC_IMAGES_H_
 #define INC_IMAGES_H_
 
-extern const uint16_t test_image[8 * 8];
+#include "lcd_ili9341_min.h"
+
+extern void Image_GenerateBigTest(void);
+
+extern const LCD_Image_t test_image;
+extern const LCD_Image_t cross;
+extern const LCD_Image_t chess;
+extern const LCD_Image_t img_big_test;
 
 #endif /* INC_IMAGES_H_ */

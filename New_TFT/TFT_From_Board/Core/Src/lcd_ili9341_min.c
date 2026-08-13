@@ -54,6 +54,8 @@ static void LCD_WriteDataN(const uint8_t *data, uint32_t len);
 static uint32_t RGB565_To_DMA2DColor(uint16_t c);
 static bool LCD_BeginTransfer(void);
 static void LCD_EndTransfer(void);
+static bool LCD_DMA2D_ConfigR2M(uint32_t outputOffset);
+static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t outputOffset);
 
 //CALLBACKS prototypes
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
@@ -127,6 +129,36 @@ static bool LCD_BeginTransfer(void)
 static void LCD_EndTransfer(void)
 {
     lcd_state = LCD_STATE_READY;
+}
+
+static bool LCD_DMA2D_ConfigR2M(uint32_t outputOffset)
+{
+    hdma2d.Init.Mode = DMA2D_R2M;
+    MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_R2M);
+
+    WRITE_REG(hdma2d.Instance->OOR, outputOffset);
+
+    return true;
+}
+
+static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t outputOffset)
+{
+    hdma2d.Init.Mode = DMA2D_M2M;
+    MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_M2M);
+
+    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputColorMode = DMA2D_INPUT_RGB565;
+
+    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputOffset = 0;
+
+    if (HAL_DMA2D_ConfigLayer(&hdma2d, DMA2D_FOREGROUND_LAYER) != HAL_OK)
+    {
+        lcd_state = LCD_STATE_ERROR;
+        return false;
+    }
+
+    WRITE_REG(hdma2d.Instance->OOR, outputOffset);
+
+    return true;
 }
 
 //PUBLIC FUNCTIONS declarations
@@ -308,9 +340,7 @@ bool LCD_FillRGB565_DMA(uint16_t color)
 
     uint32_t dma2d_color = RGB565_To_DMA2DColor(color);
 
-    WRITE_REG(hdma2d.Instance->OOR, 0U);
-    hdma2d.Init.Mode = DMA2D_R2M;
-    MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_R2M);
+    LCD_DMA2D_ConfigR2M(0);
 
     if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, LCD_FB_ADDR, LCD_W, LCD_H) != HAL_OK)
     {
@@ -349,10 +379,8 @@ bool LCD_FillRect_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t he
 
     uint32_t first_pixel_addr = LCD_FB_ADDR + (((uint32_t)y * LCD_W + x) * sizeof(uint16_t));
 
-    WRITE_REG(hdma2d.Instance->OOR, LCD_W - width);
+    LCD_DMA2D_ConfigR2M(LCD_W - width);
 
-    hdma2d.Init.Mode = DMA2D_R2M;
-    MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_R2M);
 
     if (HAL_DMA2D_Start_IT(&hdma2d, dma2d_color, first_pixel_addr, width, height) != HAL_OK)
         {
@@ -362,9 +390,9 @@ bool LCD_FillRect_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t he
         return true;
 }
 
-bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint16_t *image)
+bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
 {
-    if ((width == 0U) || (height == 0U))
+    if ((image->width == 0U) || (image->height == 0U))
         {
             return false;
         }
@@ -374,17 +402,19 @@ bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     	return false;
     }
 
-    if (image == NULL)
+    if (image->data == NULL)
     	return false;
 
     if (!LCD_BeginTransfer())
     	return false;
 
+    uint16_t width = image->width;
     if ((x + width) > LCD_W)
     {
     	width = LCD_W - x;
     }
 
+    uint16_t height = image->height;
     if ((y + height) > LCD_H)
     {
     	height = LCD_H - y;
@@ -392,22 +422,9 @@ bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t h
 
     uint32_t first_pixel_addr = LCD_FB_ADDR + (((uint32_t)y * LCD_W + x) * sizeof(uint16_t));
 
-    WRITE_REG(hdma2d.Instance->OOR, LCD_W - width);
-    hdma2d.Init.Mode = DMA2D_M2M;
-    MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_M2M);
+    LCD_DMA2D_ConfigM2M_RGB565(LCD_W - width);
 
-    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputColorMode =
-        DMA2D_INPUT_RGB565;
-
-    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputOffset = 0;
-
-    if (HAL_DMA2D_ConfigLayer(&hdma2d, DMA2D_FOREGROUND_LAYER) != HAL_OK)
-    {
-        lcd_state = LCD_STATE_ERROR;
-        return false;
-    }
-
-    if (HAL_DMA2D_Start_IT(&hdma2d, (uint32_t)image, first_pixel_addr, width, height) != HAL_OK)
+    if (HAL_DMA2D_Start_IT(&hdma2d, (uint32_t)image->data, first_pixel_addr, width, height) != HAL_OK)
         {
     		lcd_state = LCD_STATE_ERROR;
         	return false;

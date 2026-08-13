@@ -216,6 +216,28 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  Image_GenerateBigTest();
+
+  if (LCD_IsReady())
+  {
+	  if (!LCD_FillRGB565_DMA(ORANGE_Color))
+		  Error_Handler();
+  }
+  HAL_Delay(1000);
+
+  LCD_DrawImage_RGB565_DMA(1, 1, &img_big_test);
+  HAL_Delay(1000);
+
+  LCD_DrawImage_RGB565_DMA(60, 100, &img_big_test);
+  HAL_Delay(1000);
+
+  LCD_DrawImage_RGB565_DMA(120, 200, &img_big_test);
+  HAL_Delay(1000);
+
+  LCD_DrawImage_RGB565_DMA(20, 290, &img_big_test);
+  HAL_Delay(1000);
+
   while (1)
   {
     /* USER CODE END WHILE */
@@ -292,26 +314,8 @@ int main(void)
 //	  HAL_Delay(1000);
 
 
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_FillRGB565_DMA(ORANGE_Color))
-			  Error_Handler();
-	  }
-	  HAL_Delay(1000);
 
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_DrawImage_RGB565_DMA(50, 50, 8, 8, test_image))
-	  	  	  Error_Handler();
-	  }
-	  HAL_Delay(1000);
 
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_FillRGB565_DMA(BLACK_Color))
-			  Error_Handler();
-	  }
-	  HAL_Delay(1000);
 
   }
   /* USER CODE END 3 */
