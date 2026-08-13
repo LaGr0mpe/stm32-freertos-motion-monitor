@@ -11,6 +11,7 @@
 ../Core/Src/lcd_ili9341_min.c:290:13:LCD_GetState	1
 ../Core/Src/lcd_ili9341_min.c:295:6:LCD_FillRGB565	2
 ../Core/Src/lcd_ili9341_min.c:304:6:LCD_FillRGB565_DMA	3
-../Core/Src/lcd_ili9341_min.c:321:6:LCD_FillRect_RGB565_DMA	9
-../Core/Src/lcd_ili9341_min.c:361:13:LCD_DMA2D_TransferComplete	1
-../Core/Src/lcd_ili9341_min.c:367:13:LCD_DMA2D_TransferError	1
+../Core/Src/lcd_ili9341_min.c:323:6:LCD_FillRect_RGB565_DMA	9
+../Core/Src/lcd_ili9341_min.c:365:6:LCD_DrawImage_RGB565_DMA	11
+../Core/Src/lcd_ili9341_min.c:419:13:LCD_DMA2D_TransferComplete	1
+../Core/Src/lcd_ili9341_min.c:425:13:LCD_DMA2D_TransferError	1

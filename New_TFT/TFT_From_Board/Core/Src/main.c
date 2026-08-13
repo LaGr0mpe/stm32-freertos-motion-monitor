@@ -25,6 +25,7 @@
 
 #include "lcd_ili9341_min.h"
 #include "colors.h"
+#include "images.h"
 
 /* USER CODE END Includes */
 
@@ -248,48 +249,69 @@ int main(void)
 //	  }
 //	  HAL_Delay(1000);
 
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRGB565_DMA(BLACK_Color))
+//		          Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, YELLOW_Color))
+//	  	  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, RED_Color))
+//	  	  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, GREEN_Color))
+//	  	  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, BLUE_Color))
+//	  	  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+//
+//	  if (LCD_IsReady())
+//	  {
+//		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, WHITE_Color))
+//	  	  Error_Handler();
+//	  }
+//	  HAL_Delay(1000);
+
+
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRGB565_DMA(BLACK))
-		          Error_Handler();
+		  if (!LCD_FillRGB565_DMA(ORANGE_Color))
+			  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, YELLOW))
-	  	  Error_Handler();
+		  if (!LCD_DrawImage_RGB565_DMA(50, 50, 8, 8, test_image))
+	  	  	  Error_Handler();
 	  }
 	  HAL_Delay(1000);
 
 	  if (LCD_IsReady())
 	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, RED))
-	  	  Error_Handler();
+		  if (!LCD_FillRGB565_DMA(BLACK_Color))
+			  Error_Handler();
 	  }
 	  HAL_Delay(1000);
-
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, GREEN))
-	  	  Error_Handler();
-	  }
-	  HAL_Delay(1000);
-
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, BLUE))
-	  	  Error_Handler();
-	  }
-	  HAL_Delay(1000);
-
-	  if (LCD_IsReady())
-	  {
-		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, WHITE))
-	  	  Error_Handler();
-	  }
-	  HAL_Delay(1000);
-
 
   }
   /* USER CODE END 3 */
