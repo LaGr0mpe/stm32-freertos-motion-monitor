@@ -211,31 +211,35 @@ int main(void)
   /* USER CODE BEGIN 2 */
   LCD_Reset();
   LCD_Init();
-
+  Pregenerate_Images();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  Image_GenerateBigTest();
-
   if (LCD_IsReady())
   {
-	  if (!LCD_FillRGB565_DMA(ORANGE_Color))
+	  if (!LCD_FillRGB565_DMA(CYAN_Color))
 		  Error_Handler();
   }
   HAL_Delay(1000);
 
-  LCD_DrawImage_RGB565_DMA(1, 1, &img_big_test);
+  LCD_DrawImage_DMA(1, 1, &img_big_test);
   HAL_Delay(1000);
 
-  LCD_DrawImage_RGB565_DMA(60, 100, &img_big_test);
+  LCD_DrawImage_DMA(60, 100, &img_big_test);
   HAL_Delay(1000);
 
-  LCD_DrawImage_RGB565_DMA(120, 200, &img_big_test);
+  LCD_DrawImage_DMA(120, 200, &img_big_test);
   HAL_Delay(1000);
 
-  LCD_DrawImage_RGB565_DMA(20, 290, &img_big_test);
+  LCD_DrawImage_DMA(20, 290, &img_big_test);
+  HAL_Delay(1000);
+
+  LCD_DrawImage_DMA(200, 40, &img_big_test);
+  HAL_Delay(1000);
+
+  LCD_DrawImagePart_DMA(10, 220, 50, 50, 20, 20, &img_big_test);
   HAL_Delay(1000);
 
   while (1)

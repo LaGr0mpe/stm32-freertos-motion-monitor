@@ -8,6 +8,11 @@
 #include "images.h"
 #include "colors.h"
 
+void Pregenerate_Images(void)
+{
+	 Image_GenerateBigTest();
+}
+
 const uint16_t test_image_data[8 * 8] =
 {
 		WHITE_Color, WHITE_Color, BLACK_Color, WHITE_Color, WHITE_Color, BLACK_Color, BLUE_Color,  BLUE_Color,
@@ -23,6 +28,7 @@ const uint16_t test_image_data[8 * 8] =
 const LCD_Image_t test_image =
 {
     .data = test_image_data,
+	.format = LCD_IMAGE_RGB565,
     .width = 8,
     .height = 8
 };
@@ -42,6 +48,7 @@ const uint16_t cross_data[8 * 8] =
 const LCD_Image_t cross =
 {
     .data = cross_data,
+	.format = LCD_IMAGE_RGB565,
     .width = 8,
     .height = 8
 };
@@ -64,6 +71,7 @@ const uint16_t chess_data[8 * 8] =
 const LCD_Image_t chess =
 {
     .data = chess_data,
+	.format = LCD_IMAGE_RGB565,
     .width = 8,
     .height = 8
 };
@@ -128,6 +136,7 @@ void Image_GenerateBigTest(void)
 const LCD_Image_t img_big_test =
 {
     .data = img_big_test_pixels,
+	.format = LCD_IMAGE_RGB565,
     .width = 120,
     .height = 120
 };

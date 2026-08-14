@@ -21,9 +21,16 @@ typedef enum {
     LCD_STATE_ERROR
 } LCD_State_t;
 
+typedef enum
+{
+    LCD_IMAGE_RGB565,
+    LCD_IMAGE_ARGB8888
+} LCD_ImageFormat_t;
+
 typedef struct
 {
     const uint16_t *data;
+    LCD_ImageFormat_t format;
     uint16_t width;
     uint16_t height;
 } LCD_Image_t;
@@ -32,10 +39,12 @@ typedef struct
 void LCD_Init(void);
 bool LCD_IsReady();
 LCD_State_t LCD_GetState(void);
+
 void LCD_FillRGB565(uint16_t color);
 bool LCD_FillRGB565_DMA(uint16_t color);
 bool LCD_FillRect_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color);
-bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image);
+bool LCD_DrawImage_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image);
+bool LCD_DrawImagePart_DMA(uint16_t x_dist, uint16_t y_dist, uint16_t x_src, uint16_t y_src, uint16_t width, uint16_t height, const LCD_Image_t *image);
 
 #endif
 

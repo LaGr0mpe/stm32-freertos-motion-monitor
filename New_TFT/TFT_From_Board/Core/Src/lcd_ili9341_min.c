@@ -1,5 +1,4 @@
 #include "lcd_ili9341_min.h"
-#include "colors.h"
 
 extern SPI_HandleTypeDef hspi5;
 extern LTDC_HandleTypeDef hltdc;
@@ -55,7 +54,7 @@ static uint32_t RGB565_To_DMA2DColor(uint16_t c);
 static bool LCD_BeginTransfer(void);
 static void LCD_EndTransfer(void);
 static bool LCD_DMA2D_ConfigR2M(uint32_t outputOffset);
-static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t outputOffset);
+static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t inputOffset, uint32_t outputOffset);
 
 //CALLBACKS prototypes
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
@@ -141,14 +140,14 @@ static bool LCD_DMA2D_ConfigR2M(uint32_t outputOffset)
     return true;
 }
 
-static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t outputOffset)
+static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t inputOffset, uint32_t outputOffset)
 {
     hdma2d.Init.Mode = DMA2D_M2M;
     MODIFY_REG(hdma2d.Instance->CR, DMA2D_CR_MODE, DMA2D_M2M);
 
     hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputColorMode = DMA2D_INPUT_RGB565;
 
-    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputOffset = 0;
+    hdma2d.LayerCfg[DMA2D_FOREGROUND_LAYER].InputOffset = inputOffset;
 
     if (HAL_DMA2D_ConfigLayer(&hdma2d, DMA2D_FOREGROUND_LAYER) != HAL_OK)
     {
@@ -390,8 +389,13 @@ bool LCD_FillRect_RGB565_DMA(uint16_t x, uint16_t y, uint16_t width, uint16_t he
         return true;
 }
 
-bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
+bool LCD_DrawImage_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
 {
+    if (image == NULL)
+    	{
+        	return false;
+    	}
+
     if ((image->width == 0U) || (image->height == 0U))
         {
             return false;
@@ -422,9 +426,107 @@ bool LCD_DrawImage_RGB565_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
 
     uint32_t first_pixel_addr = LCD_FB_ADDR + (((uint32_t)y * LCD_W + x) * sizeof(uint16_t));
 
-    LCD_DMA2D_ConfigM2M_RGB565(LCD_W - width);
+    if (image->format == LCD_IMAGE_RGB565)
+    	{
+    		if(!LCD_DMA2D_ConfigM2M_RGB565(image->width - width , LCD_W - width))
+    		{
+    			lcd_state = LCD_STATE_ERROR;
+    			return false;
+    		}
+    	}
+    else if (image->format == LCD_IMAGE_ARGB8888)
+    	return false;
+    else
+    	return false;
+
 
     if (HAL_DMA2D_Start_IT(&hdma2d, (uint32_t)image->data, first_pixel_addr, width, height) != HAL_OK)
+        {
+    		lcd_state = LCD_STATE_ERROR;
+        	return false;
+        }
+        return true;
+}
+
+bool LCD_DrawImagePart_DMA(uint16_t x_dist, uint16_t y_dist, uint16_t x_src, uint16_t y_src, uint16_t width, uint16_t height, const LCD_Image_t *image)
+{
+    if (image == NULL)
+    	{
+        	return false;
+    	}
+
+	if ((image->width == 0U) || (image->height == 0U))
+		{
+			return false;
+    	}
+
+	if (((uint32_t)x_dist >= LCD_W) || ((uint32_t)y_dist >= LCD_H))
+		{
+			return false;
+		}
+
+	if (image->data == NULL)
+		{
+			return false;
+		}
+
+	if ((width == 0U) || (height == 0U))
+		{
+	    	return false;
+		}
+
+	if (((uint32_t)x_src >= image->width) || ((uint32_t)y_src >= image->height))
+	    {
+	       	return false;
+	    }
+
+	if (((uint32_t)x_src + width > image->width) || ((uint32_t)y_src + height > image->height))
+	    {
+	    	return false;
+	    }
+
+	if (!LCD_BeginTransfer())
+	   	{
+			return false;
+	   	}
+
+	uint16_t width_dist = width;
+	if (((uint32_t)x_dist + width_dist) > LCD_W)
+		{
+		width_dist = LCD_W - x_dist;
+		}
+
+	uint16_t height_dist = height;
+	if (((uint32_t)y_dist + height_dist) > LCD_H)
+	    {
+		height_dist = LCD_H - y_dist;
+	    }
+
+	uint32_t source_addr = (uint32_t)(image->data + (uint32_t)y_src * image->width + x_src);
+    uint32_t destination_addr = LCD_FB_ADDR + (((uint32_t)y_dist * LCD_W + x_dist) * sizeof(uint16_t));
+
+    if (image->format == LCD_IMAGE_RGB565)
+    	{
+    		if(!LCD_DMA2D_ConfigM2M_RGB565(image->width - width_dist , LCD_W - width_dist))
+    		{
+    			lcd_state = LCD_STATE_ERROR;
+    			return false;
+    		}
+    	}
+    else if (image->format == LCD_IMAGE_ARGB8888)
+    	{
+    	 	lcd_state = LCD_STATE_ERROR;
+    	 	return false;
+    	}
+
+    else
+    	{
+        	lcd_state = LCD_STATE_ERROR;
+        	return false;
+        }
+
+
+    if (HAL_DMA2D_Start_IT(&hdma2d, source_addr, destination_addr, width_dist, height_dist) != HAL_OK)
         {
     		lcd_state = LCD_STATE_ERROR;
         	return false;

@@ -10,6 +10,7 @@
 
 #include "lcd_ili9341_min.h"
 
+void Pregenerate_Images(void);
 extern void Image_GenerateBigTest(void);
 
 extern const LCD_Image_t test_image;

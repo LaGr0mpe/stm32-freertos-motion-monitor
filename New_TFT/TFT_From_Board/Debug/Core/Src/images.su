@@ -1,1 +1,2 @@
-../Core/Src/images.c:73:6:Image_GenerateBigTest	16	static
+../Core/Src/images.c:11:6:Pregenerate_Images	8	static
+../Core/Src/images.c:81:6:Image_GenerateBigTest	16	static
