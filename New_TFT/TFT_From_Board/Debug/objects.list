@@ -1,3 +1,4 @@
+"./Core/Src/font.o"
 "./Core/Src/images.o"
 "./Core/Src/lcd_ili9341_min.o"
 "./Core/Src/main.o"

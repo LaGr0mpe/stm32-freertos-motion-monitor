@@ -26,6 +26,7 @@
 #include "lcd_ili9341_min.h"
 #include "colors.h"
 #include "images.h"
+#include "font.h"
 
 /* USER CODE END Includes */
 
@@ -216,106 +217,25 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_14, GPIO_PIN_SET);
 
   if (LCD_IsReady())
   {
-	  if (!LCD_FillRGB565_DMA(CYAN_Color))
+	  if (!LCD_FillRGB565_DMA(BLACK_Color))
 		  Error_Handler();
   }
   HAL_Delay(1000);
 
-  LCD_DrawImage_DMA(1, 1, &img_big_test);
-  HAL_Delay(1000);
 
-  LCD_DrawImage_DMA(60, 100, &img_big_test);
-  HAL_Delay(1000);
-
-  LCD_DrawImage_DMA(120, 200, &img_big_test);
-  HAL_Delay(1000);
-
-  LCD_DrawImage_DMA(20, 290, &img_big_test);
-  HAL_Delay(1000);
-
-  LCD_DrawImage_DMA(200, 40, &img_big_test);
-  HAL_Delay(1000);
-
-  LCD_DrawImagePart_DMA(10, 220, 50, 50, 20, 20, &img_big_test);
-  HAL_Delay(1000);
+  if(!LCD_Print(10, 15, "Hello, World! 123", Font_Default, WHITE_Color))
+	  Error_Handler();
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRGB565_DMA(0xF800)) //red
-//		          Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRGB565_DMA(0x07E0)) //green
-//				  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRGB565_DMA(0x001F)) //blue
-//			  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, 0xFFC0)) //yellow
-//			  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
 
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRGB565_DMA(BLACK_Color))
-//		          Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(40, 120, 100, 160, YELLOW_Color))
-//	  	  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(0, 0, 40, 40, RED_Color))
-//	  	  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(200, 0, 40, 40, GREEN_Color))
-//	  	  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(0, 280, 40, 40, BLUE_Color))
-//	  	  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
-//
-//	  if (LCD_IsReady())
-//	  {
-//		  if (!LCD_FillRect_RGB565_DMA(200, 280, 40, 40, WHITE_Color))
-//	  	  Error_Handler();
-//	  }
-//	  HAL_Delay(1000);
 
 
 
@@ -816,6 +736,8 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+	  HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
+	  HAL_Delay(250);
   }
   /* USER CODE END Error_Handler_Debug */
 }

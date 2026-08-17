@@ -55,6 +55,8 @@ static bool LCD_BeginTransfer(void);
 static void LCD_EndTransfer(void);
 static bool LCD_DMA2D_ConfigR2M(uint32_t outputOffset);
 static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t inputOffset, uint32_t outputOffset);
+static void LCD_WritePixel(uint16_t x, uint16_t y, uint16_t color);
+static bool LCD_DrawChar_RGB565(uint16_t x, uint16_t y, const LCD_Glyph_t *glyph, uint16_t color);
 
 //CALLBACKS prototypes
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d);
@@ -159,6 +161,34 @@ static bool LCD_DMA2D_ConfigM2M_RGB565(uint32_t inputOffset, uint32_t outputOffs
 
     return true;
 }
+
+bool LCD_DrawChar_RGB565(uint16_t x, uint16_t y, const LCD_Glyph_t *glyph, uint16_t color)
+{
+	if (glyph == NULL || glyph->bitmap == NULL)
+		return false;
+
+	if (x >= LCD_W || y >= LCD_H)
+		return false;
+
+    for (uint16_t row = 0; row < glyph->height; row++)
+    {
+    	uint16_t row_data = glyph->bitmap[row];
+
+    	for (uint16_t col = 0; col < glyph->width; col++)
+    	{
+    		uint8_t bit = (row_data >> (glyph->width - 1U - col)) & 0x01U;
+
+    		if (bit)
+    		{
+    			LCD_WritePixel(x + col, y + row, color);
+    		}
+    	}
+    }
+
+	return true;
+}
+
+
 
 //PUBLIC FUNCTIONS declarations
 
@@ -323,13 +353,80 @@ LCD_State_t LCD_GetState(void)
 	return lcd_state;
 }
 
-void LCD_FillRGB565(uint16_t color)
+bool LCD_DrawPixel_RGB565(uint16_t x, uint16_t y, uint16_t color)
+{
+	if (x >= LCD_W || y >= LCD_H)
+    	{
+        	return false;
+    	}
+
+
+	if (!LCD_BeginTransfer())
+	   	{
+			return false;
+	   	}
+
+    volatile uint16_t *fb = (volatile uint16_t *)LCD_FB_ADDR;
+
+    fb[(uint32_t)y * LCD_W + x] = color;
+
+    LCD_EndTransfer();
+    return true;
+}
+
+static void LCD_WritePixel(uint16_t x, uint16_t y, uint16_t color)
 {
     volatile uint16_t *fb = (volatile uint16_t *)LCD_FB_ADDR;
-    for (uint32_t i = 0; i < (LCD_W * LCD_H); i++)
+
+    fb[(uint32_t)y * LCD_W + x] = color;
+}
+
+bool LCD_DrawLine_RGB565(uint16_t x_1, uint16_t y_1, uint16_t x_2, uint16_t y_2, uint16_t color)
+{
+	if (x_1 >= LCD_W || y_1 >= LCD_H || x_2 >= LCD_W || y_2 >= LCD_H)
+    	{
+        	return false;
+    	}
+
+	if (!LCD_BeginTransfer())
+	   	{
+			return false;
+	   	}
+
+    int32_t dx = abs((int32_t)x_2 - (int32_t)x_1);
+    int32_t sx = (x_1 < x_2) ? 1 : -1;
+
+    int32_t dy = -abs((int32_t)y_2 - (int32_t)y_1);
+    int32_t sy = (y_1 < y_2) ? 1 : -1;
+
+    int32_t err = dx + dy;
+
+    while (1)
     {
-        fb[i] = color;
+    	LCD_WritePixel(x_1, y_1, color);
+
+        if ((x_1 == x_2) && (y_1 == y_2))
+        {
+            break;
+        }
+
+        int32_t e2 = 2 * err;
+
+        if (e2 >= dy)
+        {
+            err += dy;
+            x_1 += sx;
+        }
+
+        if (e2 <= dx)
+        {
+            err += dx;
+            y_1 += sy;
+        }
     }
+
+    LCD_EndTransfer();
+    return true;
 }
 
 bool LCD_FillRGB565_DMA(uint16_t color)
@@ -533,6 +630,32 @@ bool LCD_DrawImagePart_DMA(uint16_t x_dist, uint16_t y_dist, uint16_t x_src, uin
         }
         return true;
 }
+
+bool LCD_Print(uint16_t x, uint16_t y, const char *text, const LCD_Glyph_t * const *font, uint16_t color)
+{
+    if (text == NULL || font == NULL)
+        return false;
+
+    while (*text != '\0')
+    {
+        uint8_t c = (uint8_t)*text;
+
+        const LCD_Glyph_t *glyph = font[c];
+
+        if (glyph != NULL)
+        {
+            if (!LCD_DrawChar_RGB565(x, y, glyph, color))
+                return false;
+
+            x += glyph->advance;
+        }
+
+        text++;
+    }
+
+    return true;
+}
+
 
 // CALLBACKS declarations
 static void LCD_DMA2D_TransferComplete(DMA2D_HandleTypeDef *hdma2d)
