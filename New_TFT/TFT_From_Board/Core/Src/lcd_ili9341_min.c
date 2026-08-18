@@ -170,6 +170,11 @@ bool LCD_DrawChar_RGB565(uint16_t x, uint16_t y, const LCD_Glyph_t *glyph, uint1
 	if (x >= LCD_W || y >= LCD_H)
 		return false;
 
+	if ((uint32_t)x + glyph->width > LCD_W || (uint32_t)y + glyph->height > LCD_H)
+	{
+	    return false;
+	}
+
     for (uint16_t row = 0; row < glyph->height; row++)
     {
     	uint16_t row_data = glyph->bitmap[row];
@@ -506,9 +511,6 @@ bool LCD_DrawImage_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
     if (image->data == NULL)
     	return false;
 
-    if (!LCD_BeginTransfer())
-    	return false;
-
     uint16_t width = image->width;
     if ((x + width) > LCD_W)
     {
@@ -532,10 +534,18 @@ bool LCD_DrawImage_DMA(uint16_t x, uint16_t y, const LCD_Image_t *image)
     		}
     	}
     else if (image->format == LCD_IMAGE_ARGB8888)
+    {
+    	lcd_state = LCD_STATE_ERROR;
     	return false;
+    }
     else
+    {
+    	lcd_state = LCD_STATE_ERROR;
     	return false;
+    }
 
+    if (!LCD_BeginTransfer())
+    	return false;
 
     if (HAL_DMA2D_Start_IT(&hdma2d, (uint32_t)image->data, first_pixel_addr, width, height) != HAL_OK)
         {
@@ -634,7 +644,14 @@ bool LCD_DrawImagePart_DMA(uint16_t x_dist, uint16_t y_dist, uint16_t x_src, uin
 bool LCD_Print(uint16_t x, uint16_t y, const char *text, const LCD_Glyph_t * const *font, uint16_t color)
 {
     if (text == NULL || font == NULL)
-        return false;
+        {
+    	return false;
+        }
+
+	if (!LCD_BeginTransfer())
+	   	{
+			return false;
+	   	}
 
     while (*text != '\0')
     {
@@ -653,6 +670,7 @@ bool LCD_Print(uint16_t x, uint16_t y, const char *text, const LCD_Glyph_t * con
         text++;
     }
 
+	LCD_EndTransfer();
     return true;
 }
 

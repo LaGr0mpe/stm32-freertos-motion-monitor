@@ -11,7 +11,7 @@
 #include "lcd_ili9341_min.h"
 #define FONT_WIDTH  8
 #define FONT_HEIGHT 8
-#define FONT_TABLE_SIZE 128
+#define FONT_TABLE_SIZE 127
 
 extern const LCD_Glyph_t * const Font_Default[FONT_TABLE_SIZE];
 

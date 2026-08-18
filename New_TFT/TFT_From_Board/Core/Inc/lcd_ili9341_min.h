@@ -30,7 +30,7 @@ typedef enum
 
 typedef struct
 {
-    const uint16_t *data;
+    const void *data;
     LCD_ImageFormat_t format;
     uint16_t width;
     uint16_t height;

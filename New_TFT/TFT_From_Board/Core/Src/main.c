@@ -226,9 +226,24 @@ int main(void)
   }
   HAL_Delay(1000);
 
+  if(!LCD_Print(45, 133, " !\"#$%&'()*+,-./", Font_Default, WHITE_Color))
+  	Error_Handler();
 
-  if(!LCD_Print(10, 15, "Hello, World! 123", Font_Default, WHITE_Color))
-	  Error_Handler();
+  if(!LCD_Print(45, 142, "0123456789:;<=>?", Font_Default, WHITE_Color))
+  	Error_Handler();
+
+  if(!LCD_Print(45, 151, "@ABCDEFGHIJKLMNO", Font_Default, WHITE_Color))
+  	Error_Handler();
+
+  if(!LCD_Print(45, 160, "PQRSTUVWXYZ[\\]^_", Font_Default, WHITE_Color))
+  	Error_Handler();
+
+  if(!LCD_Print(45, 169, "`abcdefghijklmnop", Font_Default, WHITE_Color))
+  	Error_Handler();
+
+  if(!LCD_Print(45, 178, "qrstuvwxyz{|}~", Font_Default, WHITE_Color))
+  	Error_Handler();
+
 
   while (1)
   {
